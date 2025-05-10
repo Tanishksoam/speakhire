@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { FormCreationMethod } from '../types';
 import OptionCard from '../components/FormBuilder/Card';
 import { Plus, FileUp, Sparkles } from 'lucide-react';
@@ -26,6 +26,7 @@ export default function FormBuilderPage() {
   
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             {/* Start from scratch option */}
+            <Link to="/form-builder/scratch">
             <OptionCard
               title="Start from scratch"
               description="Build from a list of ready-made form elements."
@@ -33,24 +34,28 @@ export default function FormBuilderPage() {
               method="scratch"
               onSelect={() => handleMethodSelection("scratch")}
             />
+            </Link>
   
             {/* Import questions option */}
+            <Link to="/form-builder/import">
             <OptionCard
               title="Import questions"
               description="Copy and paste questions or import from Google Forms."
               icon={<FileUp className="h-8 w-8 text-purple-500" />}
               method="import"
               onSelect={() => handleMethodSelection("import")}
-            />
-  
+              />
+              </Link>
             {/* Create with AI option */}
+            <Link to="/form-builder/ai">
             <OptionCard
               title="Create with AI"
               description="Use AI to help generate questions for any form."
               icon={<Sparkles className="h-8 w-8 text-indigo-500" />}
               method="ai"
               onSelect={() => handleMethodSelection("ai")}
-            />
+              />
+              </Link>
           </div>
         
         </div>

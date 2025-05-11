@@ -29,15 +29,16 @@ export const FormCanvas: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex">
+    <div className="flex-1 flex overflow-hidden h-full">
       <div
-        className="flex-1 p-8 bg-gray-50"
+        className="flex-1 p-8 bg-gray-200 h-full"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-      onClick={handleCanvasClick}
+        onClick={handleCanvasClick}
       >
         <div 
-          className="bg-white rounded-lg min-h-[600px] p-6 border-2 border-dashed border-gray-300"
+          className="bg-white rounded-lg max-w-3xl mx-auto p-6 border-2 border-dashed border-gray-300 overflow-y-auto h-[calc(100vh-140px)]"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E0 #F7FAFC' }}
         >
           {fields.map((field) => (
             <div

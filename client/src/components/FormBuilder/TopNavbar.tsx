@@ -9,7 +9,7 @@ import {
 
 export const TopNavbar: React.FC = () => {
   return (
-    <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
+    <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white z-10 sticky top-0 left-0 right-0">
       <div className="flex space-x-4">
         <TooltipProvider>
           <Tooltip>
@@ -26,46 +26,16 @@ export const TopNavbar: React.FC = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-code mr-2"></i>Integrate
+                <i className="fas fa-code mr-2"></i>Response
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Get integration code</p>
+              <p>Get responses</p>
             </TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-share mr-2"></i>Share
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Share this form</p>
-            </TooltipContent>
-          </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-chart-bar mr-2"></i>Results
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>View form results</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-cog mr-2"></i>Settings
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Form settings</p>
-            </TooltipContent>
-          </Tooltip>
+          
         </TooltipProvider>
       </div>
     </div>

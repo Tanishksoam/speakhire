@@ -14,7 +14,12 @@ export type FieldType =
   | 'heading'
   | 'paragraph'
   | 'dropdown'
-  | 'pictureChoice';
+  | 'pictureChoice'
+  | 'date'
+  | 'time'
+  | 'rating'
+  | 'longAnswer'
+  | 'slider';
 
 export interface FieldCategory {
   title: string;

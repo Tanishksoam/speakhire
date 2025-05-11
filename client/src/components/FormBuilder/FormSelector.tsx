@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { setDraggedField, addField } from '../../store/FormBuilderSlice';
+import { setDraggedField, addField } from '../../store/features/FormBuilderSlice';
 import type  { FieldCategory, FieldType } from '../../types';
 import { Card, CardContent } from "@/components/ui/card";
 

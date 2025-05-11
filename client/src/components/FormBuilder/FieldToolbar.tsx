@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { deleteField, duplicateField } from '../../store/FormBuilderSlice';
+import { deleteField, duplicateField } from '../../store/features/FormBuilderSlice';
 import type { Field } from '../../types';
 import {
   Tooltip,

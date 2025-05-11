@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { addField, selectField, setDraggedField } from '../../store/FormBuilderSlice';
+import { addField, selectField, setDraggedField } from '../../store/features/FormBuilderSlice';
 import { FieldToolbar } from './FieldToolbar';
 import  { FieldComponent } from './FiledComponent';
 

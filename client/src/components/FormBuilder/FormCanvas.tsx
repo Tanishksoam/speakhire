@@ -28,42 +28,48 @@ export const FormCanvas: React.FC = () => {
     dispatch(selectField(null));
   };
 
+  // Find the selected field for the toolbar
+  const selectedField = fields.find(field => field.id === selectedFieldId);
+
   return (
-    <div className="flex-1 flex overflow-hidden h-full">
+    <div className="flex-1 p-8 bg-gray-200 h-full relative">
+      {/* Main canvas area */}
       <div
-        className="flex-1 p-8 bg-gray-200 h-full"
+        className="bg-white rounded-lg max-w-3xl mx-auto p-6 border-2 border-dashed border-gray-300 h-[calc(100vh-140px)]"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E0 #F7FAFC', overflowY: 'auto', overflowX: 'hidden' }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleCanvasClick}
       >
-        <div 
-          className="bg-white rounded-lg max-w-3xl mx-auto p-6 border-2 border-dashed border-gray-300 overflow-y-auto h-[calc(100vh-140px)]"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E0 #F7FAFC' }}
-        >
-          {fields.map((field) => (
-            <div
-              key={field.id}
-              className={`mb-4 p-4 border rounded-lg relative flex items-center ${
-                selectedFieldId === field.id ? "border-blue-500" : "border-gray-200"
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch(selectField(field.id));
-              }}
-            >
-              <div className="flex-1">
-                <FieldComponent field={field} />
-              </div>
-              {selectedFieldId === field.id && <FieldToolbar field={field} />}
+        {fields.map((field) => (
+          <div
+            key={field.id}
+            className={`mb-4 p-4 border rounded-lg relative flex items-center ${
+              selectedFieldId === field.id ? "border-blue-500" : "border-gray-200"
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(selectField(field.id));
+            }}
+          >
+            <div className="flex-1">
+              <FieldComponent field={field} />
             </div>
-          ))}
-          {fields.length === 0 && (
-            <div className="h-full flex items-center justify-center text-gray-400">
-              Drag and drop form fields here
-            </div>
-          )}
-        </div>
+          </div>
+        ))}
+        {fields.length === 0 && (
+          <div className="h-full flex items-center justify-center text-gray-400">
+            Drag and drop form fields here
+          </div>
+        )}
       </div>
+      
+      {/* Toolbar positioned in the gray area outside the form */}
+      {selectedField && (
+        <div className="absolute right-8 top-1/4">
+          <FieldToolbar field={selectedField} />
+        </div>
+      )}
     </div>
   );
 };

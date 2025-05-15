@@ -48,6 +48,9 @@ export const formBuilderSlice = createSlice({
     },
     reorderFields: (state, action: PayloadAction<Field[]>) => {
       state.fields = action.payload;
+    },
+    setFields: (state, action: PayloadAction<Field[]>) => {
+      state.fields = action.payload;
     }
   },
 });
@@ -58,7 +61,8 @@ export const {
   selectField, 
   deleteField, 
   duplicateField,
-  reorderFields 
+  reorderFields,
+  setFields 
 } = formBuilderSlice.actions;
 
 export default formBuilderSlice.reducer;

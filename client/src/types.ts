@@ -3,6 +3,7 @@ export interface Field {
   id: string;
   type: string;
   title?: string;
+  label?: string;
   required?: boolean;
   properties?: Record<string, any>;
 }

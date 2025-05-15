@@ -1,21 +1,72 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { addField, selectField, setDraggedField } from '../../store/features/FormBuilderSlice';
+import { addField, selectField, setDraggedField, setFields } from '../../store/features/FormBuilderSlice';
+import { addField as addCustomField } from '../../store/features/customFormSlice';
 import { FieldToolbar } from './FieldToolbar';
-import  { FieldComponent } from './FiledComponent';
+import { FieldComponent } from './FiledComponent';
 
 export const FormCanvas: React.FC = () => {
   const dispatch = useDispatch();
   const { fields, draggedField, selectedFieldId } = useSelector((state: RootState) => state.formBuilder);
+  const customFormFields = useSelector((state: RootState) => state.customForm.fields);
+  
+  // Sync fields from customForm to formBuilder ONLY on component mount
+  // This prevents infinite update loops while still ensuring persistence
+  useEffect(() => {
+    // Only run this effect once on mount
+    if (customFormFields.length > 0 && fields.length > 0) {
+      // Check if fields actually need updating to avoid unnecessary dispatches
+      let needsUpdate = false;
+      
+      const updatedFields = fields.map(field => {
+        const customField = customFormFields.find(cf => cf.id === field.id);
+        if (customField) {
+          const newTitle = customField.title || customField.label || field.title;
+          const newLabel = customField.label || customField.title || field.label;
+          
+          if (newTitle !== field.title || newLabel !== field.label) {
+            needsUpdate = true;
+            return {
+              ...field,
+              title: newTitle,
+              label: newLabel
+            };
+          }
+        }
+        return field;
+      });
+      
+      // Only dispatch if there are actual changes
+      if (needsUpdate) {
+        dispatch(setFields(updatedFields));
+      }
+    }
+  }, []); // Empty dependency array = run only on mount
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (draggedField) {
-      dispatch(addField({ 
-        type: draggedField, 
-        id: Date.now().toString() 
+      const newFieldId = Date.now().toString();
+      const newField = {
+        type: draggedField,
+        id: newFieldId,
+        title: '',
+        label: ''
+      };
+      
+      // Add to formBuilder slice
+      dispatch(addField(newField));
+      
+      // Also add to customForm slice for persistence
+      dispatch(addCustomField({
+        id: newFieldId,
+        type: draggedField,
+        label: '',
+        title: '',
+        required: false
       }));
+      
       dispatch(setDraggedField(null));
     }
   };

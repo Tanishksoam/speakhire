@@ -57,7 +57,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     // If token is provided, verify it's the admin token
     if (token) {
-      if (form.accesstoke === token) {
+      if (form.accessToken !== undefined && form.accessToken === token) {
         // Admin access - return full form with responses
         return res.json({
           message: "Form accessed with admin privileges",
@@ -129,7 +129,7 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     const updatedForm = await Form.findByIdAndUpdate(
       id,
       {
-        accesstoke: accessToken,
+        accessToken: accessToken,
         recipients,
         isTemplate: true,
         publishedUrl: `${
@@ -145,12 +145,32 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
 
     // Create the form URL with token for each recipient
     const baseUrl = process.env.CLIENT_URL || "http://localhost:3000";
-    const formLinks = recipients.map((recipient) => {
-      return {
-        email: recipient.email,
-        link: `${baseUrl}/forms/${id}/respond?email=${encodeURIComponent(
-          recipient.email
-        )}&token=${recipient.token}`,
+    const formLinks = recipients.map((recipient) => ({
+      email: recipient.email,
+      link: `${baseUrl}/forms/${id}/respond?email=${encodeURIComponent(recipient.email)}&token=${recipient.token}`,
+      token: recipient.token,
+    }));
+
+    // Send emails to new recipients
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const emailPromises = newRecipients.map((recipient) => {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: recipient.email,
+        subject: `Form: ${form.title}`,
+        html: `
+          <h2>${form.title}</h2>
+          <p>You have been invited to fill out a form.</p>
+          <p>Click the link below to access the form:</p>
+          <a href="${formLinks.find((f) => f.email === recipient.email)?.link}">Fill out form</a>
+        `,
         token: recipient.token,
       };
     });

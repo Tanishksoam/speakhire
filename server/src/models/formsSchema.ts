@@ -26,7 +26,7 @@ export interface IForm extends Document {
   recipients: Recipient[]; //receipens with one time token to fill the form
   createdBy?: mongoose.Types.ObjectId;
   responses: Response[];
-  accesstoke: string; //main token for form owner to edit/acess
+  accessToken: string; //main token for form owner to edit/acess
   isTemplate: boolean;
   publishedUrl: string;
 

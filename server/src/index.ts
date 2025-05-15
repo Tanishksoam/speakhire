@@ -1,19 +1,36 @@
 import express from 'express';
+import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors';
 import formRoutes from './routes/form';
-import userRoutes from './routes/user';
+
+
 
 dotenv.config();
+
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 5001;
+
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // Add your client URLs here
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
-app.use('/api/forms', formRoutes);
-app.use('/api/users', userRoutes);
 
-mongoose.connect(process.env.MONGO_URI!).then(() => {
-  console.log('MongoDB connected');
-  app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
-});
+app.use('/api/forms', formRoutes);
+app.use('/api/responses', responseRoutes);
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI as string)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });

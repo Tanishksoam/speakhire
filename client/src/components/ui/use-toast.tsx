@@ -27,10 +27,9 @@ export const useToast = () => {
   return {
     toast,
     toasts,
-    dismiss: (id: string) => {},
-    update: (id: string, props: ToastProps) => {},
+    dismiss: (_id: string) => {},
+    update: (_id: string, _props: ToastProps) => {},
   }
 }
 
 export { toast } from './toast'
-

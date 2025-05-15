@@ -1,5 +1,3 @@
-import React from "react";
-
 function LandingPage() {
   return (
     <div className="font-sans min-h-screen flex flex-col bg-[#f0f4ff] text-[#1a1a2e]">
@@ -40,13 +38,13 @@ function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
                 <a
                   href="/create"
-                  className="w-full sm:w-auto bg-[#4a6fa5] text-white px-6 sm:px-8 py-3 rounded-lg shadow font-semibold hover:bg-[#3a5a80] transition-colors text-sm sm:text-base text-center"
+                  className="w-full sm:w-auto bg-[#4a6fa5] !text-white px-6 sm:px-8 py-3 rounded-lg shadow font-semibold hover:bg-[#3a5a80] hover:!text-white transition-colors text-sm sm:text-base text-center no-underline"
                 >
                   Create a Survey
                 </a>
                 <a
                   href="/login"
-                  className="w-full sm:w-auto bg-white text-[#4a6fa5] border border-[#4a6fa5] px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm sm:text-base text-center"
+                  className="w-full sm:w-auto bg-white !text-[#4a6fa5] border border-[#4a6fa5] px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 hover:!text-[#4a6fa5] transition-colors text-sm sm:text-base text-center no-underline"
                 >
                   Return to Your Survey
                 </a>
@@ -320,7 +318,7 @@ function LandingPage() {
         </div>
         <div className="text-[#a6cab3] flex flex-col md:flex-row justify-between items-center gap-4 mt-10 pt-6 border-t border-[#a6cab3] text-xs opacity-80">
           <div className="flex flex-wrap gap-2 items-center justify-center">
-            <span>© 2024 SpeakHire</span>
+            <span>&copy; 2024 SpeakHire</span>
             <span>•</span>
             <a href="/privacy" className="hover:underline">
               Privacy Policy

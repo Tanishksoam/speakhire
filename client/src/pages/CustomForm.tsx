@@ -12,14 +12,13 @@ export const FormBuilder: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
   const dispatch = useDispatch();
   
-  // State for form data and active tab
+  // State for form data
   const [formData, setFormData] = useState({
     id: formId || 'new-form', // Use URL param or default for new forms
     title: 'Untitled Form'
   });
   
-  // Set the active tab to 'edit' by default for the form builder
-  const [activeTab, setActiveTab] = useState<'edit' | 'response'>('edit');
+
   
   // Fetch form data if we have an existing form ID
   useEffect(() => {
@@ -54,7 +53,6 @@ export const FormBuilder: React.FC = () => {
           <TopNavbar 
             formId={formData.id} 
             formTitle={formData.title}
-            activeTab={activeTab}
           />
         </div>
         <div className="flex-1 overflow-hidden">

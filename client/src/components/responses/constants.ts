@@ -5,11 +5,14 @@ interface TShirtItem {
 }
 
 export interface Response {
+  [key: string]: string | number;
   id: number;
   submission_id: string;
   question_text: string;
   selected_option: string;
   submitted_at: string;
+  timestamp: string;
+  status: 'pending' | 'completed';
 }
 
 interface Distribution {
@@ -21,7 +24,11 @@ interface Distribution {
   }[];
 }
 
-interface Analytics {
+export interface Summary {
+  distributions: Distribution[];
+}
+
+export interface Analytics {
   total_responses: number;
   satisfaction_rate: number;
   recommendation_rate: number;
@@ -49,6 +56,8 @@ export const DUMMY_RESPONSES: Response[] = [
     question_text: "What type of t-shirt do you prefer?",
     selected_option: "Basic Tee",
     submitted_at: "2025-01-15T10:30:00Z",
+    timestamp: "2025-01-15T10:30:00Z",
+    status: 'completed',
   },
   {
     id: 2,
@@ -56,6 +65,8 @@ export const DUMMY_RESPONSES: Response[] = [
     question_text: "What color do you prefer?",
     selected_option: "Black",
     submitted_at: "2025-01-15T10:30:00Z",
+    timestamp: "2025-01-15T10:30:00Z",
+    status: 'completed',
   },
   {
     id: 3,
@@ -63,6 +74,8 @@ export const DUMMY_RESPONSES: Response[] = [
     question_text: "What size do you wear?",
     selected_option: "M",
     submitted_at: "2025-01-15T10:30:00Z",
+    timestamp: "2025-01-15T10:30:00Z",
+    status: 'completed',
   },
   {
     id: 4,
@@ -70,6 +83,8 @@ export const DUMMY_RESPONSES: Response[] = [
     question_text: "What type of t-shirt do you prefer?",
     selected_option: "Sport Tee",
     submitted_at: "2025-01-15T11:15:00Z",
+    timestamp: "2025-01-15T11:15:00Z",
+    status: 'completed',
   },
   {
     id: 5,
@@ -77,10 +92,12 @@ export const DUMMY_RESPONSES: Response[] = [
     question_text: "What color do you prefer?",
     selected_option: "Blue",
     submitted_at: "2025-01-15T11:15:00Z",
+    timestamp: "2025-01-15T11:15:00Z",
+    status: 'completed',
   },
 ];
 
-export const DUMMY_SUMMARY: { distributions: Distribution[] } = {
+export const DUMMY_SUMMARY: Summary = {
   distributions: [
     {
       question_text: "What type of t-shirt do you prefer?",

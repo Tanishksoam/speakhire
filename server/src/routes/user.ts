@@ -28,21 +28,6 @@ router.post('/create', async (req: Request, res: Response) => {
   }
 });
 
-// Get user by email
-router.get('/:email', async (req: Request, res: Response) => {
-  try {
-    const { email } = req.params;
-    const user = await User.findOne({ email });
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    res.json(user);
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+// User routes have been simplified - all recipient management is now handled in form routes
 
 export default router;

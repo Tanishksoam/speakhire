@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
-import Form from "../models/Form";
-import User from "../models/User";
+import Form from "../models/formsSchema";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import { Types } from "mongoose";
 
 const router = express.Router();
 
@@ -11,24 +11,31 @@ router.post("/create", async (req: Request, res: Response) => {
   try {
     const { title, description, formFields } = req.body;
 
-    if (!title || !formFields || !Array.isArray(formFields) || formFields.length === 0) {
-      return res.status(400).json({ message: "Form title and fields are required" });
+    if (
+      !title ||
+      !formFields ||
+      !Array.isArray(formFields) ||
+      formFields.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Form title and fields are required" });
     }
 
     // Create the form with default values
     const form = await Form.create({
       title,
-      description: description || '',
+      description: description || "",
       formFields,
-      isPublished: false,
-      publishedUrl: '',
+      isTemplate: false,
+      publishedUrl: "",
       responses: [],
-      recipients: []
+      recipients: [],
     });
 
     res.status(201).json({
       message: "Form created successfully",
-      data: form
+      data: form,
     });
   } catch (error) {
     console.error("Error creating form:", error);
@@ -54,7 +61,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         // Admin access - return full form with responses
         return res.json({
           message: "Form accessed with admin privileges",
-          data: form
+          data: form,
         });
       } else {
         return res.status(403).json({ message: "Invalid access token" });
@@ -67,13 +74,13 @@ router.get("/:id", async (req: Request, res: Response) => {
       title: form.title,
       description: form.description,
       formFields: form.formFields,
-      isPublished: form.isPublished,
-      publishedUrl: form.publishedUrl
+      isTemplate: form.isTemplate,
+      publishedUrl: form.publishedUrl,
     };
 
     res.json({
       message: "Form retrieved successfully",
-      data: publicForm
+      data: publicForm,
     });
   } catch (error) {
     console.error("Error fetching form:", error);
@@ -90,7 +97,9 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     const { emails } = req.body;
 
     if (!Array.isArray(emails) || emails.length === 0) {
-      return res.status(400).json({ message: "At least one email is required" });
+      return res
+        .status(400)
+        .json({ message: "At least one email is required" });
     }
 
     // Check if form exists
@@ -102,12 +111,19 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     // Generate main access token for the form owner
     const accessToken = crypto.randomBytes(32).toString("hex");
 
-    // Generate tokens for each recipient
-    const recipients = emails.map((email: string) => ({
-      email,
-      token: crypto.randomBytes(16).toString("hex"),
-      used: false,
-    }));
+    // Generate tokens for each new recipient
+    const existingRecipients = form.recipients || [];
+    const existingEmails = new Set(existingRecipients.map((r) => r.email));
+
+    const newRecipients = emails
+      .filter((email: string) => !existingEmails.has(email))
+      .map((email: string) => ({
+        email,
+        token: crypto.randomBytes(16).toString("hex"),
+        used: false,
+      }));
+
+    const recipients = [...existingRecipients, ...newRecipients];
 
     // Update the form with tokens and mark as published
     const updatedForm = await Form.findByIdAndUpdate(
@@ -115,8 +131,10 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
       {
         accesstoke: accessToken,
         recipients,
-        isPublished: true,
-        publishedUrl: `${process.env.CLIENT_URL || 'http://localhost:3000'}/forms/${id}`
+        isTemplate: true,
+        publishedUrl: `${
+          process.env.CLIENT_URL || "http://localhost:3000"
+        }/forms/${id}`,
       },
       { new: true }
     );
@@ -126,12 +144,14 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     }
 
     // Create the form URL with token for each recipient
-    const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-    const formLinks = recipients.map(recipient => {
+    const baseUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const formLinks = recipients.map((recipient) => {
       return {
         email: recipient.email,
-        link: `${baseUrl}/forms/${id}/respond?email=${encodeURIComponent(recipient.email)}&token=${recipient.token}`,
-        token: recipient.token
+        link: `${baseUrl}/forms/${id}/respond?email=${encodeURIComponent(
+          recipient.email
+        )}&token=${recipient.token}`,
+        token: recipient.token,
       };
     });
 
@@ -142,7 +162,7 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       try {
         const transporter = nodemailer.createTransport({
-          service: process.env.EMAIL_SERVICE || 'gmail',
+          service: process.env.EMAIL_SERVICE || "gmail",
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -166,18 +186,23 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
             `,
           });
         }
-        console.log(`Successfully sent form invitations to ${recipients.length} recipients`);
+        console.log(
+          `Successfully sent form invitations to ${recipients.length} recipients`
+        );
       } catch (error) {
         console.error("Error sending emails:", error);
         // Continue execution even if email sending fails
       }
     } else {
-      console.warn('Email configuration not found. Skipping email sending.');
-      console.log('Generated tokens:', formLinks.map(link => ({
-        email: link.email,
-        token: link.token,
-        link: link.link
-      })));
+      console.warn("Email configuration not found. Skipping email sending.");
+      console.log(
+        "Generated tokens:",
+        formLinks.map((link) => ({
+          email: link.email,
+          token: link.token,
+          link: link.link,
+        }))
+      );
     }
 
     // Return success response with form details
@@ -188,19 +213,20 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
         formTitle: form.title,
         accessToken: accessToken,
         adminLink: adminLink,
-        recipients: formLinks.map(link => ({
+        recipients: formLinks.map((link) => ({
           email: link.email,
           token: link.token,
-          link: link.link
-        }))
-      }
+          link: link.link,
+        })),
+      },
     });
   } catch (error: unknown) {
     console.error("Error publishing form:", error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(500).json({ 
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    res.status(500).json({
       message: "Failed to publish form",
-      error: errorMessage
+      error: errorMessage,
     });
   }
 });
@@ -212,9 +238,12 @@ router.post("/:id/submit", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { response, email, token } = req.body;
+    console.log(response);
 
     if (!response || !email || !token) {
-      return res.status(400).json({ message: "Response data, email, and token are required" });
+      return res
+        .status(400)
+        .json({ message: "Response data, email, and token are required" });
     }
 
     // Check if form exists
@@ -234,23 +263,74 @@ router.post("/:id/submit", async (req: Request, res: Response) => {
 
     // Mark the token as used
     await Form.updateOne(
-      { 
+      {
         _id: id,
         "recipients.email": email,
-        "recipients.token": token
+        "recipients.token": token,
       },
       { $set: { "recipients.$.used": true } }
     );
 
-    // Add response to form
-    await Form.findByIdAndUpdate(id, { $push: { responses: response } });
+    // Check if user has already submitted a response
+    const existingResponse = form.responses || [];
+    const hasExistingResponse = existingResponse.some((r) => r.email === email);
+    if (hasExistingResponse) {
+      return res
+        .status(400)
+        .json({ message: "You have already submitted a response" });
+    }
 
-    res.status(200).json({ 
+    // Create response object with email and responses
+    const responseObj = {
+      email,
+      responses: response,
+      submittedAt: new Date()
+    };
+
+    await Form.findByIdAndUpdate(
+      id,
+      { $push: { responses: responseObj } },
+      { new: true }
+    );
+
+    // Send thank you email if email configuration is available
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const transporter = nodemailer.createTransport({
+          service: process.env.EMAIL_SERVICE || "gmail",
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+
+        await transporter.sendMail({
+          from: `"SpeakHire" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: `Thank You for Your Response - ${form.title}`,
+          html: `
+            <h1>Thank You for Your Response!</h1>
+            <p>We've successfully received your response for the form: <strong>${
+              form.title
+            }</strong></p>
+            ${form.description ? `<p>${form.description}</p>` : ""}
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <p>Best regards,<br/>The SpeakHire Team</p>
+          `,
+        });
+        console.log(`Thank you email sent to ${email}`);
+      } catch (emailError) {
+        console.error("Error sending thank you email:", emailError);
+        // Don't fail the request if email sending fails
+      }
+    }
+
+    res.status(200).json({
       message: "Response submitted successfully",
       data: {
         formId: id,
-        email: email
-      }
+        email: email,
+      },
     });
   } catch (error) {
     console.error("Error submitting form:", error);
@@ -270,7 +350,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
     if (!form) {
       return res.status(404).json({
         valid: false,
-        message: "Form not found"
+        message: "Form not found",
       });
     }
 
@@ -280,7 +360,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
       return res.status(isAdminValid ? 200 : 403).json({
         valid: isAdminValid,
         message: isAdminValid ? "Admin access verified" : "Invalid admin token",
-        form: isAdminValid ? form : undefined
+        form: isAdminValid ? form : undefined,
       });
     }
 
@@ -288,7 +368,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
     if (!email || !token) {
       return res.status(400).json({
         valid: false,
-        message: "Email and token are required"
+        message: "Email and token are required",
       });
     }
 
@@ -300,7 +380,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
     if (!recipient) {
       return res.status(403).json({
         valid: false,
-        message: "Invalid token or email"
+        message: "Invalid token or email",
       });
     }
 
@@ -308,7 +388,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
     if (recipient.used) {
       return res.status(403).json({
         valid: false,
-        message: "This token has already been used"
+        message: "This token has already been used",
       });
     }
 
@@ -320,14 +400,14 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
         formId: form._id,
         title: form.title,
         description: form.description,
-        formFields: form.formFields
-      }
+        formFields: form.formFields,
+      },
     });
   } catch (error) {
     console.error("Error verifying token:", error);
     return res.status(500).json({
       valid: false,
-      message: "Server error"
+      message: "Server error",
     });
   }
 });
@@ -361,8 +441,8 @@ router.get("/:id/responses", async (req: Request, res: Response) => {
         title: form.title,
         responses: form.responses,
         recipientCount: form.recipients.length,
-        responseCount: form.responses.length
-      }
+        responseCount: form.responses.length,
+      },
     });
   } catch (error) {
     console.error("Error accessing form responses:", error);

@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Define types for our API responses
 interface Form {
@@ -7,7 +7,7 @@ interface Form {
   title: string;
   description?: string;
   formFields: any[];
-  isPublished: boolean;
+  isTemplate: boolean;
   publishedUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -18,83 +18,85 @@ interface PublishFormResponse {
   form: {
     id: string;
     title: string;
-    isPublished: boolean;
+    isTemplate: boolean;
     publishedUrl: string;
   };
 }
 
 // Create the API slice with endpoints
 export const apiSlice = createApi({
-  reducerPath: 'api',
+  reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:5000/api',
+    baseUrl: "http://localhost:5000/api",
     prepareHeaders: (headers) => {
       // Get token from localStorage since auth slice isn't fully implemented yet
       // This is a temporary solution until the auth slice is properly implemented
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+        headers.set("authorization", `Bearer ${token}`);
       }
       return headers;
     },
   }),
-  tagTypes: ['Form', 'Response'],
+  tagTypes: ["Form", "Response"],
   endpoints: (builder) => ({
     // Get all forms for the current user
     getUserForms: builder.query<Form[], void>({
-      query: () => '/forms/user',
+      query: () => "/forms/user",
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ _id }) => ({ type: 'Form' as const, id: _id })),
-              { type: 'Form', id: 'LIST' },
+              ...result.map(({ _id }) => ({ type: "Form" as const, id: _id })),
+              { type: "Form", id: "LIST" },
             ]
-          : [{ type: 'Form', id: 'LIST' }],
+          : [{ type: "Form", id: "LIST" }],
     }),
-    
+
     // Get a single form by ID
     getFormById: builder.query<Form, string>({
       query: (id) => `/forms/${id}`,
-      providesTags: (_, __, id) => [{ type: 'Form', id }],
+      providesTags: (_, __, id) => [{ type: "Form", id }],
     }),
-    
+
     // Create a new form
     createForm: builder.mutation<Form, Partial<Form>>({
       query: (formData) => ({
-        url: '/forms',
-        method: 'POST',
+        url: "/forms",
+        method: "POST",
         body: formData,
       }),
-      invalidatesTags: [{ type: 'Form', id: 'LIST' }],
+      invalidatesTags: [{ type: "Form", id: "LIST" }],
     }),
-    
+
     // Update an existing form
-    updateForm: builder.mutation<Form, { id: string; formData: Partial<Form> }>({
-      query: ({ id, formData }) => ({
-        url: `/forms/${id}`,
-        method: 'PUT',
-        body: formData,
-      }),
-      invalidatesTags: (_, __, { id }) => [{ type: 'Form', id }],
-    }),
-    
+    updateForm: builder.mutation<Form, { id: string; formData: Partial<Form> }>(
+      {
+        query: ({ id, formData }) => ({
+          url: `/forms/${id}`,
+          method: "PUT",
+          body: formData,
+        }),
+        invalidatesTags: (_, __, { id }) => [{ type: "Form", id }],
+      }
+    ),
+
     // Publish a form
     publishForm: builder.mutation<PublishFormResponse, string>({
       query: (id) => ({
         url: `/forms/${id}/publish`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: (_, __, id) => [{ type: 'Form', id }],
+      invalidatesTags: (_, __, id) => [{ type: "Form", id }],
     }),
-    
+
     // Delete a form
     deleteForm: builder.mutation<{ message: string; formId: string }, string>({
       query: (id) => ({
         url: `/forms/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: [{ type: 'Form', id: 'LIST' }],
+      invalidatesTags: [{ type: "Form", id: "LIST" }],
     }),
   }),
 });

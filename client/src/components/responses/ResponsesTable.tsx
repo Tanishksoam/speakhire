@@ -6,17 +6,17 @@ import type { Dispatch, SetStateAction } from "react";
 
 interface ResponsesTableProps {
   responses: Response[];
-  selectedResponse: Response | null;
-  setSelectedResponse: Dispatch<SetStateAction<Response | null>>;
+  editingResponse: Response | null;
+  setEditingResponse: Dispatch<SetStateAction<Response | null>>;
   handleEdit: () => Promise<void>;
   handleSort: (key: string) => void;
-  sortConfig: { key: string | null; direction: "asc" | "desc" | string };
+  sortConfig: { key: string | null; direction: "asc" | "desc" };
 }
 
 export default function ResponsesTable({
   responses,
-  selectedResponse,
-  setSelectedResponse,
+  editingResponse,
+  setEditingResponse,
   handleEdit,
   handleSort,
   sortConfig,
@@ -69,12 +69,12 @@ export default function ResponsesTable({
                 {response.question_text}
               </td>
               <td className="px-6 py-4 whitespace-nowrap font-roboto">
-                {selectedResponse?.id === response.id ? (
+                {editingResponse?.id === response.id ? (
                   <select
-                    value={selectedResponse.selected_option}
+                    value={editingResponse.selected_option}
                     onChange={(e) =>
-                      setSelectedResponse({
-                        ...selectedResponse,
+                      setEditingResponse({
+                        ...editingResponse,
                         selected_option: e.target.value,
                       })
                     }
@@ -96,7 +96,7 @@ export default function ResponsesTable({
                   .substring(0, 19)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                {selectedResponse?.id === response.id ? (
+                {editingResponse?.id === response.id ? (
                   <div className="space-x-2">
                     <button
                       onClick={handleEdit}
@@ -105,7 +105,7 @@ export default function ResponsesTable({
                       Save
                     </button>
                     <button
-                      onClick={() => setSelectedResponse(null)}
+                      onClick={() => setEditingResponse(null)}
                       className="text-red-600 hover:text-red-900"
                     >
                       Cancel
@@ -113,7 +113,7 @@ export default function ResponsesTable({
                   </div>
                 ) : (
                   <button
-                    onClick={() => setSelectedResponse(response)}
+                    onClick={() => setEditingResponse(response)}
                     className="text-blue-600 hover:text-blue-900"
                   >
                     Edit

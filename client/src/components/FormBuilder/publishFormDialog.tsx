@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { X } from "lucide-react"
+import { X, Check, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +16,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import formService from "@/api/formService"
+import { isValidEmail } from "@/utils/formValidation"
 
 interface PublishModalProps {
   formId: string;
@@ -31,6 +33,10 @@ export function PublishFormDialog({ formId, formToken, onClose, onPublish, open,
   const [emailInput, setEmailInput] = useState("")
   const [emails, setEmails] = useState<string[]>([])
   const [invalidEmailsMessage, setInvalidEmailsMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [publishedLinks, setPublishedLinks] = useState<{email: string, link: string}[]>([])
 
   const handleAddEmail = () => {
     if (!emailInput) return
@@ -73,20 +79,52 @@ export function PublishFormDialog({ formId, formToken, onClose, onPublish, open,
     setEmails(emails.filter((e) => e !== email))
   }
 
-  const handlePublish = () => {
-    onPublish(emails)
-    onOpenChange(false)
+  const handlePublish = async () => {
+    if (emails.length === 0) return
+    
+    setIsSubmitting(true)
+    setError(null)
+    setSuccess(false)
+    
+    try {
+      // Call the API to publish the form
+      const response = await formService.publishForm(formId, emails)
+      
+      // Set success state and published links
+      setSuccess(true)
+      setPublishedLinks(response.recipients.map(r => ({
+        email: r.email,
+        link: r.link
+      })))
+      
+      // Call the onPublish callback with the emails
+      onPublish(emails)
+      
+    } catch (err: any) {
+      // Error is already formatted by the formService
+      setError(err.message || "Failed to publish form")
+      console.error("Form publishing error:", err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleClose = () => {
+    // Reset states when closing
+    setEmailInput("")
+    setEmails([])
+    setInvalidEmailsMessage("")
+    setError(null)
+    setSuccess(false)
+    setPublishedLinks([])
+    setIsSubmitting(false)
+    
+    // Close the dialog
     onOpenChange(false)
     onClose()
   }
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return emailRegex.test(email)
-  }
+  // Using the imported isValidEmail function from utils/formValidation
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -203,14 +241,68 @@ export function PublishFormDialog({ formId, formToken, onClose, onPublish, open,
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-between">
-          <Button variant="ghost" onClick={handleClose}>
-            Cancel
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center">
+              <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
+              <p className="text-sm font-medium text-red-800">Error</p>
+            </div>
+            <p className="text-sm text-red-700 mt-1">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center">
+              <Check className="h-4 w-4 text-green-600 mr-2" />
+              <p className="text-sm font-medium text-green-800">Success</p>
+            </div>
+            <p className="text-sm text-green-700 mt-1">
+              Form published successfully to {emails.length} recipient{emails.length !== 1 ? "s" : ""}.
+            </p>
+          </div>
+        )}
+
+        {success && publishedLinks.length > 0 && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-md">
+            <h4 className="text-sm font-medium mb-2">Published Form Links:</h4>
+            <ul className="space-y-2 text-sm">
+              {publishedLinks.map((item, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <span className="text-gray-700">{item.email}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => navigator.clipboard.writeText(item.link)}
+                  >
+                    Copy Link
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <DialogFooter className="sm:justify-between mt-4">
+          <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            {success ? "Close" : "Cancel"}
           </Button>
-          <Button type="button" onClick={handlePublish} disabled={emails.length === 0}>
-            {emails.length === 0
-              ? "Add recipients to publish"
-              : `Publish to ${emails.length} recipient${emails.length !== 1 ? "s" : ""}`}
+          <Button 
+            type="button" 
+            onClick={handlePublish} 
+            disabled={emails.length === 0 || isSubmitting || success}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Publishing...
+              </>
+            ) : emails.length === 0 ? (
+              "Add recipients to publish"
+            ) : (
+              `Publish to ${emails.length} recipient${emails.length !== 1 ? "s" : ""}`
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

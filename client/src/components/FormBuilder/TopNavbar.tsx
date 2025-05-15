@@ -65,7 +65,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle, activeT
           formTitle={formTitle}
           formToken={"dummy-token"}
           onClose={() => setPublishDialogOpen(false)}
-          onPublish={(emails) => { /* TODO: implement publish logic */ }}
+          onPublish={(_emails) => { /* Will be handled by PublishFormDialog */ }}
           open={publishDialogOpen}
           onOpenChange={setPublishDialogOpen}
         />

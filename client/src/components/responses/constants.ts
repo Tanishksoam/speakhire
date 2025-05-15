@@ -4,7 +4,7 @@ interface TShirtItem {
   size: string;
 }
 
-interface Response {
+export interface Response {
   id: number;
   submission_id: string;
   question_text: string;

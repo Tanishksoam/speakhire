@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -6,15 +6,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Zap } from 'lucide-react';
+import { PublishFormDialog } from './publishFormDialog';
 
-export const TopNavbar: React.FC = () => {
+interface TopNavbarProps {
+  formId: string;
+  formTitle: string;
+  activeTab?: 'edit' | 'response';
+}
+
+export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle, activeTab = 'edit' }) => {
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   return (
-    <div className="h-14 border-b border-gray-200 flex items-center px-4 bg-white">
+    <div className="h-14 border-b border-gray-200 flex items-center justify-between px-4 bg-white z-10 sticky top-0 left-0 right-0">
       <div className="flex space-x-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
+              <Button 
+                variant={activeTab === 'edit' ? 'default' : 'ghost'} 
+                className={`flex items-center ${activeTab === 'edit' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              >
                 <i className="fas fa-edit mr-2"></i>Edit
               </Button>
             </TooltipTrigger>
@@ -25,48 +37,38 @@ export const TopNavbar: React.FC = () => {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-code mr-2"></i>Integrate
+              <Button 
+                variant={activeTab === 'response' ? 'default' : 'ghost'} 
+                className={`flex items-center ${activeTab === 'response' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              >
+                <i className="fas fa-code mr-2"></i>Response
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Get integration code</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-share mr-2"></i>Share
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Share this form</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-chart-bar mr-2"></i>Results
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>View form results</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="flex items-center">
-                <i className="fas fa-cog mr-2"></i>Settings
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Form settings</p>
+              <p>Get responses</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      </div>
+      
+      {/* Preview and Publish buttons */}
+      <div className="flex items-center space-x-3">
+        <Button  className="border border-gray-300 border-width-2 bg-white text-gray-700 hover:bg-gray-100 ">
+          Preview
+        </Button>
+        
+        <Button className="bg-gray-900 text-white hover:bg-gray-800 flex items-center" onClick={() => setPublishDialogOpen(true)}>
+          Publish <Zap className="ml-2 h-4 w-4" />
+        </Button>
+        <PublishFormDialog
+          formId={formId}
+          formTitle={formTitle}
+          formToken={"dummy-token"}
+          onClose={() => setPublishDialogOpen(false)}
+          onPublish={(emails) => { /* TODO: implement publish logic */ }}
+          open={publishDialogOpen}
+          onOpenChange={setPublishDialogOpen}
+        />
       </div>
     </div>
   );

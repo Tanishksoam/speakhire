@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { deleteField, duplicateField } from '../../store/FormBuilderSlice';
+import { deleteField, duplicateField } from '../../store/features/FormBuilderSlice';
 import type { Field } from '../../types';
 import {
   Tooltip,
@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Plus, FileText, Type, Image, Video, Trash } from 'lucide-react';
 
 interface FieldToolbarProps {
   field: Field;
@@ -36,7 +37,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
     };
 
   return (
-    <div className="absolute -right-12 flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -46,7 +47,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
               onClick={handleDuplicateField}
             >
-              <i className="fas fa-plus"></i>
+              <Plus size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -62,7 +63,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
               onClick={handleImportQuestion}
             >
-              <i className="fas fa-file-import"></i>
+              <FileText size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -77,7 +78,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               size="icon"
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
             >
-              <i className="fas fa-font"></i>
+              <Type size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -92,7 +93,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               size="icon"
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
             >
-              <i className="fas fa-image"></i>
+              <Image size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -107,7 +108,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               size="icon"
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
             >
-              <i className="fas fa-video"></i>
+              <Video size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -115,20 +116,6 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
           </TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="p-2 bg-white rounded shadow hover:bg-gray-50 text-gray-600"
-            >
-              <i className="fas fa-cog"></i>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Field settings</p>
-          </TooltipContent>
-        </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -138,7 +125,7 @@ export const FieldToolbar: React.FC<FieldToolbarProps> = ({ field }) => {
               className="p-2 bg-white rounded shadow hover:bg-gray-50 text-red-500"
               onClick={handleDeleteField}
             >
-              <i className="fas fa-trash"></i>
+              <Trash size={16} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

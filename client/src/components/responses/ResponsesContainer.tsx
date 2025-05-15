@@ -4,7 +4,34 @@ import TabNavigation from "./TabNavigation";
 import ResponsesTable from "./ResponsesTable";
 import SummaryView from "./SummaryView";
 import AnalyticsView from "./AnalyticsView";
-import { type Response, type Summary, type Analytics, DUMMY_RESPONSES, DUMMY_SUMMARY, DUMMY_ANALYTICS } from "./constants";
+import type { Response } from "./constants";
+import { DUMMY_RESPONSES, DUMMY_SUMMARY, DUMMY_ANALYTICS } from "./constants";
+
+interface Distribution {
+  question_text: string;
+  options: {
+    selected_option: string;
+    count: number;
+    percentage: number;
+  }[];
+}
+
+interface Summary {
+  distributions: Distribution[];
+}
+
+interface Analytics {
+  total_responses: number;
+  satisfaction_rate: number;
+  recommendation_rate: number;
+  completion_rate: number;
+  average_time: string;
+  popular_choices: {
+    tshirt: string;
+    color: string;
+    size: string;
+  };
+}
 
 export default function ResponsesContainer(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<string>("results");
@@ -13,7 +40,7 @@ export default function ResponsesContainer(): React.ReactElement {
   const [analytics, setAnalytics] = useState<Analytics>(DUMMY_ANALYTICS);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedResponse, setSelectedResponse] = useState<Response | null>(null);
+  const [editingResponse, setEditingResponse] = useState<Response | null>(null);
 
   // Initialize chartTypes with default values for each question
   const [chartTypes, setChartTypes] = useState<Record<string, string>>(() => {
@@ -33,7 +60,7 @@ export default function ResponsesContainer(): React.ReactElement {
   }>({ key: null, direction: "asc" });
 
   const handleEdit = async (): Promise<void> => {
-    if (!selectedResponse) return;
+    if (!editingResponse) return;
 
     try {
       const response = await fetch("/api/survey-responses", {
@@ -41,8 +68,8 @@ export default function ResponsesContainer(): React.ReactElement {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           operation: "updateResponse",
-          id: selectedResponse.id,
-          selected_option: selectedResponse.selected_option,
+          id: editingResponse.id,
+          selected_option: editingResponse.selected_option,
         }),
       });
 
@@ -53,11 +80,11 @@ export default function ResponsesContainer(): React.ReactElement {
       // Update the local state with the edited response
       setResponses((prevResponses) =>
         prevResponses.map((resp) =>
-          resp.id === selectedResponse.id ? selectedResponse : resp
+          resp.id === editingResponse.id ? editingResponse : resp
         )
       );
 
-      setSelectedResponse(null);
+      setEditingResponse(null);
     } catch (err) {
       console.error(err);
       setError(
@@ -103,10 +130,10 @@ export default function ResponsesContainer(): React.ReactElement {
 
     setResponses((prevResponses) => {
       return [...prevResponses].sort((a, b) => {
-        if (a[key as keyof typeof DUMMY_RESPONSES[0]] < b[key as keyof typeof DUMMY_RESPONSES[0]]) {
+        if (a[key as keyof Response] < b[key as keyof Response]) {
           return direction === "asc" ? -1 : 1;
         }
-        if (a[key as keyof typeof DUMMY_RESPONSES[0]] > b[key as keyof typeof DUMMY_RESPONSES[0]]) {
+        if (a[key as keyof Response] > b[key as keyof Response]) {
           return direction === "asc" ? 1 : -1;
         }
         return 0;
@@ -137,8 +164,8 @@ export default function ResponsesContainer(): React.ReactElement {
               {activeTab === "results" && (
                 <ResponsesTable
                   responses={responses}
-                  selectedResponse={selectedResponse}
-                  setSelectedResponse={setSelectedResponse}
+                  editingResponse={editingResponse}
+                  setEditingResponse={setEditingResponse}
                   handleEdit={handleEdit}
                   handleSort={handleSort}
                   sortConfig={sortConfig}

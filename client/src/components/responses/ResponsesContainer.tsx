@@ -130,10 +130,10 @@ export default function ResponsesContainer(): React.ReactElement {
 
     setResponses((prevResponses) => {
       return [...prevResponses].sort((a, b) => {
-        if (a[key] < b[key]) {
+        if (a[key as keyof Response] < b[key as keyof Response]) {
           return direction === "asc" ? -1 : 1;
         }
-        if (a[key] > b[key]) {
+        if (a[key as keyof Response] > b[key as keyof Response]) {
           return direction === "asc" ? 1 : -1;
         }
         return 0;

@@ -9,39 +9,65 @@ interface FieldComponentProps {
   onUpdate?: (updatedField: Field) => void;
 }
 
-// Validation interface
-interface ValidationOptions {
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-  pattern?: string;
-  // Error messages are now handled automatically
+// Simple UI components to avoid dependencies
+interface InputProps {
+  id?: string;
+  type?: string;
+  placeholder?: string;
+  value?: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
+  min?: string;
+  max?: string;
+  disabled?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-// Simple UI components to avoid dependencies
-const Input = ({ type = 'text', placeholder, value, onChange, className = '' }: any) => (
+const Input = ({ id, type = 'text', placeholder, value, onChange, className = '', min, max, disabled, onKeyDown }: InputProps) => (
   <input 
+    id={id}
     type={type} 
     placeholder={placeholder} 
     value={value} 
     onChange={onChange} 
     className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+    min={min}
+    max={max}
+    disabled={disabled}
+    onKeyDown={onKeyDown}
   />
 );
 
-const Textarea = ({ placeholder, value, onChange, rows = 3, className = '' }: any) => (
-  <textarea 
-    placeholder={placeholder} 
-    value={value} 
-    onChange={onChange} 
+interface TextareaProps {
+  id?: string;
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
+  rows?: number;
+}
+
+const Textarea = ({ id, placeholder, value, onChange, className = '', rows = 3 }: TextareaProps) => (
+  <textarea
+    id={id}
+    placeholder={placeholder}
+    value={value}
+    onChange={onChange}
     rows={rows}
-    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${className}`}
+    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
   />
 );
 
-const Button = ({ children, onClick, variant = 'primary', size = 'md', className = '', disabled = false }: any) => {
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  variant?: 'primary' | 'outline' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  disabled?: boolean;
+}
+
+const Button = ({ children, onClick, variant = 'primary', size = 'md', className = '', disabled = false }: ButtonProps) => {
   const baseClasses = 'px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500';
   const variantClasses = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',
@@ -66,13 +92,25 @@ const Button = ({ children, onClick, variant = 'primary', size = 'md', className
   );
 };
 
-const Label = ({ children, htmlFor, className = '' }: any) => (
+interface LabelProps {
+  children: React.ReactNode;
+  htmlFor?: string;
+  className?: string;
+}
+
+const Label = ({ children, htmlFor, className = '' }: LabelProps) => (
   <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 mb-1 ${className}`}>
     {children}
   </label>
 );
 
-const Checkbox = ({ id, checked, onChange }: { id: string, checked?: boolean, onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+interface CheckboxProps {
+  id: string;
+  checked?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const Checkbox = ({ id, checked, onChange }: CheckboxProps) => (
   <input 
     type="checkbox" 
     id={id} 
@@ -140,16 +178,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
     }
   }, [field.id, dispatch, onUpdate]);
 
-  
-  const handleClear = () => {
-    setCharCount(0);
-    if (onUpdate) {
-      onUpdate({
-        ...field,
-        title: ''
-      });
-    }
-  };
   
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
@@ -311,6 +339,9 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
 
   // Validation options UI
   const renderValidationOptions = () => {
+    // Disable validation for heading and paragraph
+    if (['heading', 'paragraph'].includes(field.type)) return null;
+
     // For email fields, automatically apply validation without showing the button
     if (field.type === 'email') {
       // Automatically set the pattern for email validation
@@ -760,7 +791,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
               <h2 className="text-xl font-bold">{questionText}</h2>
             </div>
           </div>
-          {renderValidationOptions()}
         </div>
       );
     case 'paragraph':
@@ -781,7 +811,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
               <p className="text-gray-600">{questionText}</p>
             </div>
           </div>
-          {renderValidationOptions()}
         </div>
       );
       

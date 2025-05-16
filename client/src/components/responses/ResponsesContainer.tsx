@@ -56,8 +56,8 @@ export default function ResponsesContainer(): React.ReactElement {
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: string | null;
-    direction: string;
-  }>({ key: null, direction: "asc" });
+    direction: 'asc' | 'desc';
+  }>({ key: null, direction: 'asc' });
 
   const handleEdit = async (): Promise<void> => {
     if (!editingResponse) return;
@@ -122,10 +122,7 @@ export default function ResponsesContainer(): React.ReactElement {
   }, [activeTab]);
 
   const handleSort = (key: string): void => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
+    const direction: 'asc' | 'desc' = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
 
     setResponses((prevResponses) => {

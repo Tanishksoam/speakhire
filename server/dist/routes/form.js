@@ -24,6 +24,7 @@ router.post("/create", async (req, res) => {
         const form = await formsSchema_1.default.create({
             title,
             description: description || "",
+            accessToken: crypto_1.default.randomBytes(32).toString("hex"),
             formFields,
             isTemplate: false,
             publishedUrl: "",
@@ -44,23 +45,9 @@ router.post("/create", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { token } = req.query; // Optional access token for admin access
         const form = await formsSchema_1.default.findById(id);
         if (!form) {
             return res.status(404).json({ message: "Form not found" });
-        }
-        // If token is provided, verify it's the admin token
-        if (token) {
-            if (form.accesstoke === token) {
-                // Admin access - return full form with responses
-                return res.json({
-                    message: "Form accessed with admin privileges",
-                    data: form,
-                });
-            }
-            else {
-                return res.status(403).json({ message: "Invalid access token" });
-            }
         }
         // Public access - return form without responses
         const publicForm = {
@@ -112,7 +99,7 @@ router.post("/:id/publish", async (req, res) => {
         const recipients = [...existingRecipients, ...newRecipients];
         // Update the form with tokens and mark as published
         const updatedForm = await formsSchema_1.default.findByIdAndUpdate(id, {
-            accesstoke: accessToken,
+            accessToken: accessToken,
             recipients,
             isTemplate: true,
             publishedUrl: `${process.env.CLIENT_URL || "https://speakhire.vercel.app"}/forms/${id}`,
@@ -302,7 +289,7 @@ router.post("/:id/submit", async (req, res) => {
         if (!form)
             return res.status(404).json({ error: "Form not found" });
         const recipient = form.recipients.find((r) => r.email === email && r.token === token);
-        if (!recipient || recipient.used)
+        if (!recipient || recipient.used === true)
             return res.status(401).json({ error: "Invalid or already used token" });
         // Save the form response
         form.responses.push({
@@ -359,7 +346,7 @@ router.post("/:id/verify-token", async (req, res) => {
         }
         // Check if this is an admin token verification
         if (adminToken) {
-            const isAdminValid = form.accesstoke === adminToken;
+            const isAdminValid = form.accessToken === adminToken;
             return res.status(isAdminValid ? 200 : 403).json({
                 valid: isAdminValid,
                 message: isAdminValid ? "Admin access verified" : "Invalid admin token",
@@ -413,6 +400,8 @@ router.get("/:id/responses", async (req, res) => {
     try {
         const { id } = req.params;
         const { token } = req.query;
+        console.log("Form ID:", id);
+        console.log("Access token:", token);
         if (!token) {
             return res.status(400).json({ message: "Access token is required" });
         }
@@ -422,7 +411,8 @@ router.get("/:id/responses", async (req, res) => {
             return res.status(404).json({ message: "Form not found" });
         }
         // Verify the access token
-        if (form.accesstoke !== token) {
+        if (form.accessToken !== token) {
+            console.log("Invalid access token ", form.accessToken, token);
             return res.status(403).json({ message: "Invalid access token" });
         }
         // Return just the responses

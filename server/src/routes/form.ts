@@ -26,6 +26,7 @@ router.post("/create", async (req: Request, res: Response) => {
     const form = await Form.create({
       title,
       description: description || "",
+      accessToken: crypto.randomBytes(32).toString("hex"),
       formFields,
       isTemplate: false,
       publishedUrl: "",
@@ -115,7 +116,7 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     const updatedForm = await Form.findByIdAndUpdate(
       id,
       {
-        accesstoke: accessToken,
+        accessToken: accessToken,
         recipients,
         isTemplate: true,
         publishedUrl: `${
@@ -337,7 +338,7 @@ router.post("/:id/submit", async (req: Request, res: Response) => {
     const recipient = form.recipients.find(
       (r) => r.email === email && r.token === token
     );
-    if (!recipient || recipient.used)
+    if (!recipient || recipient.used === true)
       return res.status(401).json({ error: "Invalid or already used token" });
 
     // Save the form response
@@ -403,7 +404,7 @@ router.post("/:id/verify-token", async (req: Request, res: Response) => {
 
     // Check if this is an admin token verification
     if (adminToken) {
-      const isAdminValid = form.accesstoke === adminToken;
+      const isAdminValid = form.accessToken === adminToken;
       return res.status(isAdminValid ? 200 : 403).json({
         valid: isAdminValid,
         message: isAdminValid ? "Admin access verified" : "Invalid admin token",
@@ -465,6 +466,9 @@ router.get("/:id/responses", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { token } = req.query;
 
+    console.log("Form ID:", id);
+    console.log("Access token:", token);
+
     if (!token) {
       return res.status(400).json({ message: "Access token is required" });
     }
@@ -476,7 +480,8 @@ router.get("/:id/responses", async (req: Request, res: Response) => {
     }
 
     // Verify the access token
-    if (form.accesstoke !== token) {
+    if (form.accessToken !== token) {
+      console.log("Invalid access token ", form.accessToken, token);
       return res.status(403).json({ message: "Invalid access token" });
     }
 

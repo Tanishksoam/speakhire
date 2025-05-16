@@ -234,103 +234,164 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
 // Note: The /:id/invite endpoint has been replaced by the more comprehensive /:id/publish endpoint
 
 // Submit a form response
+// router.post("/:id/submit", async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const { response, email, token } = req.body;
+//     console.log(response);
+
+//     if (!response || !email || !token) {
+//       return res
+//         .status(400)
+//         .json({ message: "Response data, email, and token are required" });
+//     }
+
+//     // Check if form exists
+//     const form = await Form.findById(id);
+//     if (!form) {
+//       return res.status(404).json({ message: "Form not found" });
+//     }
+
+//     // Find the recipient with matching email and token
+//     const recipient = form.recipients.find(
+//       (r) => r.email === email && r.token === token && !r.used
+//     );
+
+//     if (!recipient) {
+//       return res.status(403).json({ message: "Invalid or used token" });
+//     }
+
+//     // Mark the token as used
+//     await Form.updateOne(
+//       {
+//         _id: id,
+//         "recipients.email": email,
+//         "recipients.token": token,
+//       },
+//       { $set: { "recipients.$.used": true } }
+//     );
+
+//     // Check if user has already submitted a response
+//     const existingResponse = form.responses || [];
+//     const hasExistingResponse = existingResponse.some((r) => r.email === email);
+//     if (hasExistingResponse) {
+//       return res
+//         .status(400)
+//         .json({ message: "You have already submitted a response" });
+//     }
+
+//     // Create response object with email and responses
+//     const responseObj = {
+//       email,
+//       responses: response,
+//       submittedAt: new Date()
+//     };
+
+//     await Form.findByIdAndUpdate(
+//       id,
+//       { $push: { responses: responseObj } },
+//       { new: true }
+//     );
+
+//     // Send thank you email if email configuration is available
+//     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+//       try {
+//         const transporter = nodemailer.createTransport({
+//           service: process.env.EMAIL_SERVICE || "gmail",
+//           auth: {
+//             user: process.env.EMAIL_USER,
+//             pass: process.env.EMAIL_PASS,
+//           },
+//         });
+
+//         await transporter.sendMail({
+//           from: `"SpeakHire" <${process.env.EMAIL_USER}>`,
+//           to: email,
+//           subject: `Thank You for Your Response - ${form.title}`,
+//           html: `
+//             <h1>Thank You for Your Response!</h1>
+//             <p>We've successfully received your response for the form: <strong>${
+//               form.title
+//             }</strong></p>
+//             ${form.description ? `<p>${form.description}</p>` : ""}
+//             <p>If you have any questions, please don't hesitate to contact us.</p>
+//             <p>Best regards,<br/>The SpeakHire Team</p>
+//           `,
+//         });
+//         console.log(`Thank you email sent to ${email}`);
+//       } catch (emailError) {
+//         console.error("Error sending thank you email:", emailError);
+//         // Don't fail the request if email sending fails
+//       }
+//     }
+
+//     res.status(200).json({
+//       message: "Response submitted successfully",
+//       data: {
+//         formId: id,
+//         email: email,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error submitting form:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
 router.post("/:id/submit", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { email, token, response } = req.body;
+
   try {
-    const { id } = req.params;
-    const { response, email, token } = req.body;
-    console.log(response);
-
-    if (!response || !email || !token) {
-      return res
-        .status(400)
-        .json({ message: "Response data, email, and token are required" });
-    }
-
-    // Check if form exists
+    console.log("Form ID:", id);
+    console.log("Request body:", req.body);
     const form = await Form.findById(id);
-    if (!form) {
-      return res.status(404).json({ message: "Form not found" });
-    }
+    if (!form) return res.status(404).json({ error: "Form not found" });
 
-    // Find the recipient with matching email and token
     const recipient = form.recipients.find(
-      (r) => r.email === email && r.token === token && !r.used
+      (r) => r.email === email && r.token === token
     );
+    if (!recipient || recipient.used)
+      return res.status(401).json({ error: "Invalid or already used token" });
 
-    if (!recipient) {
-      return res.status(403).json({ message: "Invalid or used token" });
-    }
-
-    // Mark the token as used
-    await Form.updateOne(
-      {
-        _id: id,
-        "recipients.email": email,
-        "recipients.token": token,
-      },
-      { $set: { "recipients.$.used": true } }
-    );
-
-    // Check if user has already submitted a response
-    const existingResponse = form.responses || [];
-    const hasExistingResponse = existingResponse.some((r) => r.email === email);
-    if (hasExistingResponse) {
-      return res
-        .status(400)
-        .json({ message: "You have already submitted a response" });
-    }
-
-    // Create response object with email and responses
-    const responseObj = {
+    // Save the form response
+    form.responses.push({
       email,
-      responses: response,
-      submittedAt: new Date()
-    };
+      responses: response, // must match schema key
+    });
 
-    await Form.findByIdAndUpdate(
-      id,
-      { $push: { responses: responseObj } },
-      { new: true }
-    );
+    // Mark token as used
+    recipient.used = true;
 
-    // Send thank you email if email configuration is available
+    await form.save();
+    // Optional: Send thank-you email
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        const transporter = nodemailer.createTransport({
-          service: process.env.EMAIL_SERVICE || "gmail",
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
+      const transporter = nodemailer.createTransport({
+        service: process.env.EMAIL_SERVICE || "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
 
-        await transporter.sendMail({
-          from: `"SpeakHire" <${process.env.EMAIL_USER}>`,
-          to: email,
-          subject: `Thank You for Your Response - ${form.title}`,
-          html: `
-            <h1>Thank You for Your Response!</h1>
-            <p>We've successfully received your response for the form: <strong>${
-              form.title
-            }</strong></p>
-            ${form.description ? `<p>${form.description}</p>` : ""}
-            <p>If you have any questions, please don't hesitate to contact us.</p>
-            <p>Best regards,<br/>The SpeakHire Team</p>
-          `,
-        });
-        console.log(`Thank you email sent to ${email}`);
-      } catch (emailError) {
-        console.error("Error sending thank you email:", emailError);
-        // Don't fail the request if email sending fails
-      }
+      await transporter.sendMail({
+        from: `"SpeakHire" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `Thank You for Your Response - ${form.title}`,
+        html: `
+          <h1>Thank You for Your Response!</h1>
+          <p>We've successfully received your response for the form: <strong>${
+            form.title
+          }</strong></p>
+          ${form.description ? `<p>${form.description}</p>` : ""}
+          <p>Best regards,<br/>The SpeakHire Team</p>
+        `,
+      });
     }
 
     res.status(200).json({
       message: "Response submitted successfully",
-      data: {
-        formId: id,
-        email: email,
-      },
+      data: { formId: id, email },
     });
   } catch (error) {
     console.error("Error submitting form:", error);

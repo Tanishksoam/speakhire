@@ -9,7 +9,9 @@ export interface FormField {
 }
 
 export interface Response {
-  [key: string]: string | string[];
+  email: string;
+  responses: { [key: string]: string | string[] };
+  submittedAt?: Date;
 }
 
 export interface Recipient {
@@ -50,8 +52,8 @@ const FormSchema: Schema = new Schema(
     // formfields: [{ type: mongoose.Schema.Types.Mixed, required: true }],
     responses: [
       {
-        id: { type: String, required: true },
-        value: { type: mongoose.Schema.Types.Mixed, required: true },
+        email: { type: String, required: true },
+        responses: { type: Schema.Types.Mixed, required: true },
       },
     ],
     accessToken: { type: String },

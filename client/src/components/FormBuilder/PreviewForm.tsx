@@ -169,10 +169,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'shortAnswer':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Short Answer'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Short Answer'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <input 
               type="text" 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -189,10 +191,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'email':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Email'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Email'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <input 
               type="email" 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -209,10 +213,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'longAnswer':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Long Answer'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Long Answer'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <textarea 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
               rows={4}
@@ -230,10 +236,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
         const options = field.properties?.options || [];
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Multiple Choice'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Multiple Choice'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <div className="space-y-2">
               {options.map((option: {id: string, text: string}, index: number) => (
                 <div key={option.id || index} className="flex items-center">
@@ -261,10 +269,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
         const dropdownOptions = field.properties?.options || [];
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Dropdown'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Dropdown'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <select 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
               value={value as string}
@@ -287,10 +297,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'date':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Date'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Date'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <input 
               type="date" 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -307,10 +319,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'time':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Time'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Time'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <input 
               type="time" 
               className={`w-full p-2 border ${fieldError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -327,10 +341,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'rating':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Rating'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Rating'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <div className="flex space-x-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -354,10 +370,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
         const pictureOptions = field.properties?.options || [];
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Picture Choice'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Picture Choice'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {pictureOptions.map((option: {id: string, text: string}, index: number) => (
                 <div 
@@ -390,10 +408,12 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
       case 'slider':
         return (
           <div className="mb-6" key={fieldId}>
-            <label className="block text-sm font-medium mb-1">
-              {field.title || field.label || 'Slider'}
+            <div className="mb-2">
+              <span className="font-semibold text-base text-gray-900">
+                {field.title || field.label || 'Slider'}
+              </span>
               {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+            </div>
             <input 
               type="range" 
               min="0" 

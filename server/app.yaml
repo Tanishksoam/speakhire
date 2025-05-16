@@ -1,0 +1,17 @@
+runtime: nodejs20
+
+service: default
+entrypoint: "node dist/index.js"
+
+instance_class: F2
+automatic_scaling:
+  min_instances: 1
+  max_instances: 3
+
+env_variables:
+  PORT: "8080"
+  MONGO_URI: "mongodb+srv://soamtanishk:CTyY83ZG8TuyFD5G@cluster0.ytknwh8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  CLIENT_URL: "https://speakhire.vercel.app"
+  EMAIL_USER: "soamhoney1@gmail.com"
+  EMAIL_PASS: "vdlwnspejjdfgaio"
+  EMAIL_HOST: "smtp.gmail.com"

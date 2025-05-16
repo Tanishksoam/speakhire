@@ -47,25 +47,11 @@ router.post("/create", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { token } = req.query; // Optional access token for admin access
 
     const form = await Form.findById(id);
 
     if (!form) {
       return res.status(404).json({ message: "Form not found" });
-    }
-
-    // If token is provided, verify it's the admin token
-    if (token) {
-      if (form.accesstoke === token) {
-        // Admin access - return full form with responses
-        return res.json({
-          message: "Form accessed with admin privileges",
-          data: form,
-        });
-      } else {
-        return res.status(403).json({ message: "Invalid access token" });
-      }
     }
 
     // Public access - return form without responses
@@ -133,7 +119,7 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
         recipients,
         isTemplate: true,
         publishedUrl: `${
-          process.env.CLIENT_URL || "http://localhost:3000"
+          process.env.CLIENT_URL || "https://speakhire.vercel.app"
         }/forms/${id}`,
       },
       { new: true }
@@ -144,7 +130,7 @@ router.post("/:id/publish", async (req: Request, res: Response) => {
     }
 
     // Create the form URL with token for each recipient
-    const baseUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const baseUrl = process.env.CLIENT_URL || "https://speakhire.vercel.app";
     const formLinks = recipients.map((recipient) => {
       return {
         email: recipient.email,

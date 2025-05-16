@@ -52,7 +52,6 @@ const FormSchema = new mongoose_1.Schema({
         {
             email: { type: String, required: true },
             responses: { type: mongoose_1.Schema.Types.Mixed, required: true },
-            submittedAt: { type: Date, default: Date.now },
         },
     ],
     accessToken: { type: String },

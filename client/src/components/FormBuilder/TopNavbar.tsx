@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import { Zap, Eye } from "lucide-react";
 import { PublishFormDialog } from "./publishFormDialog";
+import { PreviewForm } from "./PreviewForm";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 
 interface TopNavbarProps {
   formId: string;
@@ -10,6 +13,9 @@ interface TopNavbarProps {
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle }) => {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const fields = useSelector((state: RootState) => state.formBuilder.fields);
+  
   return (
     <div className="h-14 border-b border-gray-200 flex items-center justify-between px-4 bg-white z-10 sticky top-0 left-0 right-0">
       <div className="flex space-x-4">
@@ -18,7 +24,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle }) => {
 
       {/* Preview and Publish buttons */}
       <div className="flex items-center space-x-3">
-        <Button className="border border-gray-300 border-width-2 bg-white text-gray-700 hover:bg-gray-100 ">
+        <Button 
+          className="border border-gray-300 border-width-2 bg-white text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          onClick={() => setPreviewOpen(true)}
+        >
+          <Eye className="h-4 w-4" />
           Preview
         </Button>
 
@@ -28,6 +38,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle }) => {
         >
           Publish <Zap className="ml-2 h-4 w-4" />
         </Button>
+        
         <PublishFormDialog
           formId={formId}
           formTitle={formTitle}
@@ -38,6 +49,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle }) => {
           }}
           open={publishDialogOpen}
           onOpenChange={setPublishDialogOpen}
+        />
+        
+        <PreviewForm
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          fields={fields}
+          formTitle={formTitle}
         />
       </div>
     </div>

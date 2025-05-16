@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import type { Field } from '../../types';
 import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { updateField } from '../../store/features/customFormSlice';
+import { updateField as updateCustomField } from '../../store/features/customFormSlice';
+import { updateField as updateFormBuilderField } from '../../store/features/FormBuilderSlice';
 
 interface FieldComponentProps {
   field: Field;
@@ -159,8 +160,19 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
     setQuestionText(value);
     setCharCount(value.length);
     
-    // Then update Redux store (throttled to avoid performance issues)
-    dispatch(updateField({ 
+    // Update both Redux slices to keep them in sync
+    
+    // Update customFormSlice for persistence
+    dispatch(updateCustomField({ 
+      id: field.id, 
+      field: { 
+        title: value, 
+        label: value 
+      } 
+    }));
+    
+    // Update formBuilderSlice for UI
+    dispatch(updateFormBuilderField({ 
       id: field.id, 
       field: { 
         title: value, 
@@ -221,12 +233,39 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
   const handleAddOption = () => {
     const newOptions = [...options, `Option ${options.length + 1}`];
     setOptions(newOptions);
+    
+    // Create the updated options array in the correct format
+    const updatedOptions = newOptions.map((text, i) => ({ id: `option-${i}`, text }));
+    
+    // Update customFormSlice for persistence
+    dispatch(updateCustomField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Update formBuilderSlice for UI
+    dispatch(updateFormBuilderField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Also notify parent if callback exists
     if (onUpdate) {
       onUpdate({
         ...field,
         properties: {
           ...field.properties,
-          options: newOptions.map((text, i) => ({ id: `option-${i}`, text }))
+          options: updatedOptions
         }
       });
     }
@@ -235,12 +274,39 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
   const handleRemoveOption = (index: number) => {
     const newOptions = options.filter((_, i) => i !== index);
     setOptions(newOptions);
+    
+    // Create the updated options array in the correct format
+    const updatedOptions = newOptions.map((text, i) => ({ id: `option-${i}`, text }));
+    
+    // Update customFormSlice for persistence
+    dispatch(updateCustomField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Update formBuilderSlice for UI
+    dispatch(updateFormBuilderField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Also notify parent if callback exists
     if (onUpdate) {
       onUpdate({
         ...field,
         properties: {
           ...field.properties,
-          options: newOptions.map((text, i) => ({ id: `option-${i}`, text }))
+          options: updatedOptions
         }
       });
     }
@@ -250,12 +316,39 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({ field, onUpdate 
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+    
+    // Create the updated options array in the correct format
+    const updatedOptions = newOptions.map((text, i) => ({ id: `option-${i}`, text }));
+    
+    // Update customFormSlice for persistence
+    dispatch(updateCustomField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Update formBuilderSlice for UI
+    dispatch(updateFormBuilderField({ 
+      id: field.id, 
+      field: { 
+        properties: {
+          ...field.properties,
+          options: updatedOptions
+        }
+      } 
+    }));
+    
+    // Also notify parent if callback exists
     if (onUpdate) {
       onUpdate({
         ...field,
         properties: {
           ...field.properties,
-          options: newOptions.map((text, i) => ({ id: `option-${i}`, text }))
+          options: updatedOptions
         }
       });
     }

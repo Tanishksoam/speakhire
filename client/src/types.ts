@@ -11,6 +11,7 @@ export interface Field {
 export type FieldType = 
   | 'shortAnswer'
   | 'multipleChoice'
+  | 'radio'
   | 'email'
   | 'heading'
   | 'paragraph'

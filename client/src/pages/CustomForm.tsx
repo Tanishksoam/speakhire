@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setFields } from '../store/features/FormBuilderSlice';
+import { setTitle } from '../store/features/customFormSlice';
 import { FieldSelector } from '../components/FormBuilder/FormSelector';
 import { FormCanvas } from '../components/FormBuilder/FormCanvas';
 import { TopNavbar } from '../components/FormBuilder/TopNavbar';
-import { useParams } from 'react-router-dom';
+import FormTitle from '../components/FormBuilder/formtitle';
+import { useParams, useNavigate } from 'react-router-dom';
 
 
 export const FormBuilder: React.FC = () => {
   // Get form ID from URL params if available
   const { formId } = useParams<{ formId: string }>();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   // State for form data
   const [formData, setFormData] = useState({
@@ -18,7 +21,10 @@ export const FormBuilder: React.FC = () => {
     title: 'Untitled Form'
   });
   
-
+  // State to control the form title dialog
+  const [showTitleDialog, setShowTitleDialog] = useState(formId === 'new-form');
+  // State to control showing the form builder
+  const [showFormBuilder, setShowFormBuilder] = useState(formId !== 'new-form');
   
   // Fetch form data if we have an existing form ID
   useEffect(() => {
@@ -33,6 +39,7 @@ export const FormBuilder: React.FC = () => {
             }
             if (data.title) {
               setFormData((prev) => ({ ...prev, title: data.title }));
+              dispatch(setTitle(data.title));
             }
           }
         } catch (err) {
@@ -42,6 +49,32 @@ export const FormBuilder: React.FC = () => {
     }
     fetchForm();
   }, [formId, dispatch]);
+  
+  // Handle form title submission
+  const handleFormTitleSubmit = (title: string) => {
+    setFormData((prev) => ({ ...prev, title }));
+    setShowFormBuilder(true);
+    
+    // If we're creating a new form, update the URL
+    if (formId === 'new-form') {
+      const newFormId = `form-${Date.now()}`;
+      navigate(`/forms/${newFormId}`, { replace: true });
+    }
+  };
+  
+  // If we're showing the title dialog and not the form builder yet
+  if (!showFormBuilder && showTitleDialog) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <FormTitle
+          open={showTitleDialog}
+          onOpenChange={setShowTitleDialog}
+          onFormTitleSubmit={handleFormTitleSubmit}
+          initialTitle={formData.title !== 'Untitled Form' ? formData.title : ''}
+        />
+      </div>
+    );
+  }
   
   return (
     <div className="grid grid-cols-[260px_1fr] h-screen bg-gray-100 overflow-hidden w-full">
@@ -59,6 +92,16 @@ export const FormBuilder: React.FC = () => {
           <FormCanvas />
         </div>
       </div>
+      
+      {/* Form Title Dialog - shown when editing an existing form's title */}
+      {formId !== 'new-form' && (
+        <FormTitle
+          open={showTitleDialog}
+          onOpenChange={setShowTitleDialog}
+          onFormTitleSubmit={handleFormTitleSubmit}
+          initialTitle={formData.title}
+        />
+      )}
     </div>
   );
 };

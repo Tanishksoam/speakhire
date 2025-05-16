@@ -48,11 +48,62 @@ export const FormCanvas: React.FC = () => {
     e.preventDefault();
     if (draggedField) {
       const newFieldId = Date.now().toString();
+      
+      // Generate default title and label based on field type
+      const getDefaultTitleAndLabel = (fieldType: string) => {
+        switch(fieldType) {
+          case 'text':
+            return 'Text Question';
+          case 'textarea':
+            return 'Long Answer Question';
+          case 'number':
+            return 'Number Question';
+          case 'select':
+            return 'Dropdown Question';
+          case 'radio':
+          case 'multipleChoice':
+            return 'Multiple Choice Question';
+          case 'checkbox':
+            return 'Checkbox Question';
+          case 'date':
+            return 'Date Question';
+          case 'time':
+            return 'Time Question';
+          case 'email':
+            return 'Email Question';
+          case 'tel':
+            return 'Phone Number Question';
+          case 'url':
+            return 'Website URL Question';
+          case 'file':
+            return 'File Upload Question';
+          default:
+            return `${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)} Question`;
+        }
+      };
+      
+      const defaultTitle = getDefaultTitleAndLabel(draggedField);
+      
+      // Create default properties based on field type
+      let properties = {};
+      
+      // Add default options for multiple choice, radio, checkbox, and dropdown fields
+      if (draggedField === 'multipleChoice' || draggedField === 'radio' || draggedField === 'checkbox' || draggedField === 'select') {
+        properties = {
+          options: [
+            { id: 'option-1', text: 'Option 1' },
+            { id: 'option-2', text: 'Option 2' },
+            { id: 'option-3', text: 'Option 3' }
+          ]
+        };
+      }
+      
       const newField = {
         type: draggedField,
         id: newFieldId,
-        title: '',
-        label: ''
+        title: defaultTitle,
+        label: defaultTitle,
+        properties: properties
       };
       
       // Add to formBuilder slice
@@ -62,9 +113,10 @@ export const FormCanvas: React.FC = () => {
       dispatch(addCustomField({
         id: newFieldId,
         type: draggedField,
-        label: '',
-        title: '',
-        required: false
+        label: defaultTitle,
+        title: defaultTitle,
+        required: false,
+        properties: properties
       }));
       
       dispatch(setDraggedField(null));

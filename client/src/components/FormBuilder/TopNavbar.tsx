@@ -15,7 +15,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ formId, formTitle }) => {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const fields = useSelector((state: RootState) => state.formBuilder.fields);
-  
+  console.log("fields  in the topnavbar seciton ", fields);
   return (
     <div className="h-14 border-b border-gray-200 flex items-center justify-between px-4 bg-white z-10 sticky top-0 left-0 right-0">
       <div className="flex space-x-4">

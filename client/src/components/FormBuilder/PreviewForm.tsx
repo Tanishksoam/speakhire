@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import React, { useState } from "react";
@@ -20,6 +22,7 @@ interface PreviewFormProps {
   formTitle?: string;
 }
 
+
 interface FormValues {
   [key: string]: string | number | string[] | boolean;
 }
@@ -34,6 +37,8 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  console.log(fields);
 
   // Reset form when dialog opens
   React.useEffect(() => {
@@ -233,7 +238,9 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
         );
       
       case 'multipleChoice':
+      case 'radio':
         const options = field.properties?.options || [];
+        console.log('Rendering multiple choice/radio with options:', options);
         return (
           <div className="mb-6" key={fieldId}>
             <div className="mb-2">
@@ -243,21 +250,25 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </div>
             <div className="space-y-2">
-              {options.map((option: {id: string, text: string}, index: number) => (
-                <div key={option.id || index} className="flex items-center">
-                  <input 
-                    type="radio" 
-                    id={`${fieldId}-option-${index}`}
-                    name={fieldId}
-                    value={option.text}
-                    checked={value === option.text}
-                    onChange={() => handleInputChange(fieldId, option.text)}
-                    disabled={submitted}
-                    className="mr-2"
-                  />
-                  <label htmlFor={`${fieldId}-option-${index}`}>{option.text}</label>
-                </div>
-              ))}
+              {options.length > 0 ? (
+                options.map((option: {id: string, text: string}, index: number) => (
+                  <div key={option.id || index} className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id={`${fieldId}-option-${index}`}
+                      name={fieldId}
+                      value={option.text}
+                      checked={value === option.text}
+                      onChange={() => handleInputChange(fieldId, option.text)}
+                      disabled={submitted}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`${fieldId}-option-${index}`}>{option.text}</label>
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500">No options available</div>
+              )}
             </div>
             {fieldError && (
               <p className="text-red-500 text-sm mt-1">{fieldError.message}</p>
@@ -477,7 +488,7 @@ export function PreviewForm({ open, onOpenChange, fields, formTitle }: PreviewFo
         ) : (
           <form onSubmit={handleSubmit} className="py-4">
             <div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
-              <h1 className="text-2xl font-bold mb-6">{formTitle || "Untitled Form"}</h1>
+              <h1 className="text-2xl font-bold mb-6">{formTitle || "custom form"}</h1>
               
               {fields.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">

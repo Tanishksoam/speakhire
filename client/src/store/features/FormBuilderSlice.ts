@@ -1,21 +1,29 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createSelector } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type {Field} from "../../types";
+import type { Field } from "../../types";
+import type { RootState } from "../store";
 
-interface FormBuilderState{
-    fields: Field[];
-    draggedField:string|null;
-    selectedField:string|null;
-    selectedFieldId:string|null;
-};
+/**
+ * State shape for the form builder slice
+ * Manages UI state and fields for the form builder interface
+ */
+interface FormBuilderState {
+  fields: Field[];
+  draggedField: string | null;
+  selectedField: string | null;
+  selectedFieldId: string | null;
+}
 
 const initialState: FormBuilderState = {
   fields: [],
   draggedField: null,
-    selectedField: null,
+  selectedField: null,
   selectedFieldId: null,
 };
 
+/**
+ * Form builder slice for managing form building UI and interactions
+ */
 export const formBuilderSlice = createSlice({
   name: 'formBuilder',
   initialState,
@@ -51,9 +59,30 @@ export const formBuilderSlice = createSlice({
     },
     setFields: (state, action: PayloadAction<Field[]>) => {
       state.fields = action.payload;
+    },
+    updateField: (state, action: PayloadAction<{ id: string; field: Partial<Field> }>) => {
+      const idx = state.fields.findIndex(f => f.id === action.payload.id);
+      if (idx !== -1) {
+        state.fields[idx] = { ...state.fields[idx], ...action.payload.field };
+      }
+    },
+    resetFormBuilder: () => {
+      return initialState; // Use initialState directly for a cleaner reset
     }
   },
 });
+
+// Selectors
+export const selectFormBuilder = (state: RootState) => state.formBuilder;
+export const selectFormBuilderFields = (state: RootState) => state.formBuilder.fields;
+export const selectDraggedField = (state: RootState) => state.formBuilder.draggedField;
+export const selectSelectedFieldId = (state: RootState) => state.formBuilder.selectedFieldId;
+
+// Memoized selector for finding a field by ID
+export const selectFormBuilderFieldById = createSelector(
+  [selectFormBuilderFields, (_, fieldId: string) => fieldId],
+  (fields, fieldId) => fields.find(field => field.id === fieldId)
+);
 
 export const { 
   setDraggedField, 
@@ -62,7 +91,9 @@ export const {
   deleteField, 
   duplicateField,
   reorderFields,
-  setFields 
+  setFields,
+  updateField,
+  resetFormBuilder
 } = formBuilderSlice.actions;
 
 export default formBuilderSlice.reducer;

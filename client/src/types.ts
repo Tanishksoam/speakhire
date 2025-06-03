@@ -3,6 +3,7 @@ export interface Field {
   id: string;
   type: string;
   title?: string;
+  label?: string;
   required?: boolean;
   properties?: Record<string, any>;
 }
@@ -10,11 +11,17 @@ export interface Field {
 export type FieldType = 
   | 'shortAnswer'
   | 'multipleChoice'
+  | 'radio'
   | 'email'
   | 'heading'
   | 'paragraph'
   | 'dropdown'
-  | 'pictureChoice';
+  | 'pictureChoice'
+  | 'date'
+  | 'time'
+  | 'rating'
+  | 'longAnswer'
+  | 'slider';
 
 export interface FieldCategory {
   title: string;

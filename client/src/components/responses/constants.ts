@@ -4,7 +4,8 @@ interface TShirtItem {
   size: string;
 }
 
-interface Response {
+export interface Response {
+  [key: string]: any;
   id: number;
   submission_id: string;
   question_text: string;

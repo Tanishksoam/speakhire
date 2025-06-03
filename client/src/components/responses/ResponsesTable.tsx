@@ -1,33 +1,25 @@
 "use client";
 // Using JSX without importing React is supported in React 17+
 // with the new JSX transform
-import { TSHIRT_FORM_DATA } from "./constants";
-
-interface Response {
-  id: number;
-  submission_id: string;
-  question_text: string;
-  selected_option: string;
-  submitted_at: string;
-  [key: string]: string | number;
-}
+import { type Response } from "./constants";
+import type { Dispatch, SetStateAction } from "react";
 
 interface ResponsesTableProps {
   responses: Response[];
   editingResponse: Response | null;
-  setEditingResponse: (response: Response | null) => void;
-  handleEdit: () => void;
+  setEditingResponse: Dispatch<SetStateAction<Response | null>>;
+  handleEdit: () => Promise<void>;
   handleSort: (key: string) => void;
-  sortConfig: { key: string | null; direction: string };
+  sortConfig: { key: string | null; direction: "asc" | "desc" };
 }
 
-export default function ResponsesTable({ 
-  responses, 
-  editingResponse, 
-  setEditingResponse, 
-  handleEdit, 
-  handleSort, 
-  sortConfig 
+export default function ResponsesTable({
+  responses,
+  editingResponse,
+  setEditingResponse,
+  handleEdit,
+  handleSort,
+  sortConfig,
 }: ResponsesTableProps) {
   const getSortIndicator = (key: string): string => {
     if (sortConfig.key === key) {
@@ -88,30 +80,9 @@ export default function ResponsesTable({
                     }
                     className="border border-gray-300 rounded px-3 py-1"
                   >
-                    {TSHIRT_FORM_DATA.map((item) => (
-                      <option
-                        key={
-                          response.question_text.includes("t-shirt")
-                            ? item.name
-                            : response.question_text.includes("color")
-                            ? item.color
-                            : item.size
-                        }
-                        value={
-                          response.question_text.includes("t-shirt")
-                            ? item.name
-                            : response.question_text.includes("color")
-                            ? item.color
-                            : item.size
-                        }
-                      >
-                        {response.question_text.includes("t-shirt")
-                          ? item.name
-                          : response.question_text.includes("color")
-                          ? item.color
-                          : item.size}
-                      </option>
-                    ))}
+                    {/* Options will need to be hardcoded or replaced with a different data source */}
+                    <option value="Option 1">Option 1</option>
+                    <option value="Option 2">Option 2</option>
                   </select>
                 ) : (
                   response.selected_option
@@ -119,7 +90,10 @@ export default function ResponsesTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap font-roboto">
                 {/* Using a fixed date format to avoid hydration errors */}
-                {new Date(response.submitted_at).toISOString().replace('T', ' ').substring(0, 19)}
+                {new Date(response.submitted_at)
+                  .toISOString()
+                  .replace("T", " ")
+                  .substring(0, 19)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 {editingResponse?.id === response.id ? (
